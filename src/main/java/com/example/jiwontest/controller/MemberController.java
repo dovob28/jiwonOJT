@@ -392,7 +392,7 @@ public class MemberController {
         }
 
 
-        // 수정 로직 실행!!
+        // 수정 로직 실행!!!
         memberService.memberProjectUpdate(memberProject, prjSeqList, memSeq);
 
 
