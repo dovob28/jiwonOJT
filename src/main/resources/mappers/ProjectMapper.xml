@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.jiwontest.dao.ProjectMapper">
+
+
+
+    <!-- ProjectInfoDto 컬럼명 변경 및 등록-->
+    <!--<resultMap id="ProjectInfo" type="ProjectInfoDto">
+
+        <id property="prjSeq" column="PRJ_SEQ"/>
+        <result property="prjNm" column="PRJ_NM"/>
+        <result property="custCd" column="CUST_CD"/>
+        <result property="prjStDt" column="PRJ_ST_DT"/>
+        <result property="prjEdDt" column="PRJ_ED_DT"/>
+        <result property="prjDtl" column="PRJ_DTL"/>
+
+        <result property="custCdNM" column="CUST_CD_NM"/>
+    </resultMap>-->
+
+
+    <!--전체조회-->
+    <!--<select id="selectaAllProjects" resultMap="ProjectInfo">
+        SELECT *
+        from project_info
+    </select>-->
+
+
+
+
+</mapper>
