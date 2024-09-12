@@ -7,12 +7,18 @@ import com.example.jiwontest.dto.MemberProjectDto;
 import com.example.jiwontest.dto.ProjectInfoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+
+
+@Transactional
 @Service
 public class MemberService {
 
@@ -24,8 +30,6 @@ public class MemberService {
     /*public List<MemberInfoDto> selectAllMembers(String raCdNm,String dpCdNm, MemberInfoDto member) {
         return memberMapper.selectAllMembers(raCdNm,dpCdNm,member);
     }*/
-
-
 
 
     // 사원검색
@@ -43,7 +47,6 @@ public class MemberService {
     }
 
 
-
     // 특정 마스터 코드에 해당하는 상세 코드 리스트 조회
     public List<CodeDetail> getCodeDetailsByMstCd(String mstCd) {
 
@@ -56,8 +59,6 @@ public class MemberService {
 
         return memberMapper.getCodeDetail(mstCode, member);
     }
-
-
 
 
     // 신규등록
@@ -75,7 +76,6 @@ public class MemberService {
             }
         }
     }
-
 
 
     // 상세조회
@@ -103,7 +103,7 @@ public class MemberService {
     }
 
 
-// 보유기술 수정용!!!! (삭제 + 수정)
+    // 보유기술 수정용!!!! (삭제 + 수정)
     //  사원보유기술 삭제
     public void deleteMemberSkill(MemberInfoDto memberInfo) {
 
@@ -147,8 +147,6 @@ public class MemberService {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
     // 팝업창 조회
     public List<ProjectInfoDto> selectAllProjects() {
 
@@ -162,9 +160,6 @@ public class MemberService {
     public List<ProjectInfoDto> searchPopupPrjs(String prjNm, String custCd, int memSeq) {
         return memberMapper.searchPopupPrjs(prjNm, custCd, memSeq);
     }
-
-
-
 
 
     // 체크박스 값 저장
@@ -191,15 +186,10 @@ public class MemberService {
     }
 
 
-
     // 프로젝트 ID로 체크된 프로젝트 정보들을 가져옴
     public List<ProjectInfoDto> getProjectsByIds(List<Integer> prjSeqList) {
         return memberMapper.getProjectsByIds(prjSeqList);
     }
-
-
-
-
 
 
     // 사원 프로젝트창 조회
@@ -219,35 +209,50 @@ public class MemberService {
     }
 
     // 위에서 가져온 prjSeqList 로 project 정보 조회
-   public List<ProjectInfoDto> getProjectRegister(List<Integer> seqList) {
+    public List<ProjectInfoDto> getProjectRegister(List<Integer> seqList) {
 
         return memberMapper.getProjectRegister(seqList);
     }
 
 
-
-
     // 사원 프로젝트 리스트 삭제
-    public void memberProjectDelete(List<Integer> chkList, int memSeq) {
+    public void memberProjectDelete(List<Integer> chkList,
+                                    int memSeq) {
 
         memberMapper.memberProjectDelete(chkList, memSeq);
     }
 
 
 
-    // 사원 프로젝트 리스트 수정
-    public void memberProjectUpdate(MemberProjectDto memberProject,
-                                    List<Integer> chkList2,
-                                    int memSeq) {
-        memberMapper.memberProjectUpdate(memberProject, chkList2, memSeq);
 
+    // 사원 프로젝트 리스트 수정
+//    public void memberProjectUpdate(List<Integer> prjSeqList,
+//                                    int memSeq,
+//                                    MemberProjectDto memberProject,
+//                                    List<String> prjInDtList,
+//                                    List<String> prjOutDtList,
+//                                    List<String> prjRoCdList) {
+//
+//        memberMapper.memberProjectUpdate(prjSeqList, memSeq, memberProject, prjInDtList, prjOutDtList, prjRoCdList);
+//    }
+
+    public void memberProjectUpdate(List<Integer> prjSeqList,
+                                    int memSeq,
+                                    MemberProjectDto memberProject,
+                                    List<String> prjInDtList,
+                                    List<String> prjOutDtList,
+                                    List<String> prjRoCdList) {
+
+        // 각 리스트의 크기가 일치하는지 확인
+        if (prjSeqList.size() == prjInDtList.size() &&
+                prjSeqList.size() == prjOutDtList.size() &&
+                prjSeqList.size() == prjRoCdList.size()) {
+            memberMapper.memberProjectUpdate(prjSeqList, memSeq, memberProject, prjInDtList, prjOutDtList, prjRoCdList);
+        } else {
+            throw new IllegalArgumentException("리스트의 크기가 일치하지 않습니다.");
+        }
     }
 
 
 
-
-
-
-
 }
-

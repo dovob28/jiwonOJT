@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -285,10 +288,10 @@ public class MemberController {
         for (MemberProjectDto memberProject : memberProjectList) {
 
             seq = memberProject.getPrjSeq();
-            System.out.println("seq : " + seq);
+            //System.out.println("seq : " + seq);
 
             seqList.add(seq);
-            System.out.println("seqList : " + seqList);
+            //System.out.println("seqList : " + seqList);
         }
 
 
@@ -347,13 +350,17 @@ public class MemberController {
             prjSeqList.add(Integer.parseInt(code));  // "1" -> 1, "2" -> 2 등으로 변환 후 리스트에 추가
         }
 
-        /*for (String code : grpCode) {
+        /* 버전2
+          for (String code : grpCode) {
             prjSeqList.add(Integer.parseInt(code));
         }*/
 
         // 삭제 로직 실행
         memberService.memberProjectDelete(prjSeqList, memSeq);
 
+        System.out.println("삭제된 prjSeqList!!!!!!! => " + prjSeqList);
+
+
 
         return "redirect:/member/memberProject?memSeq=" + memSeq;
     }
@@ -362,42 +369,46 @@ public class MemberController {
 
 
 
-    // 사원 프로젝트 리스트 수정
-    /*@PostMapping("/member/memberProjectUpdate")
-    public String memberProjectUpdate(@ModelAttribute ) {}*/
 
+
+    // 사원 프로젝트 리스트 체크 수정
+    // 배열로 가져와서 각각 넣어줘야 되는거 같은데 1도 안된다 나중에 다시.........
     @PostMapping("/member/memberProjectUpdate")
     public String memberProjectUpdate(@ModelAttribute MemberProjectDto memberProject,
-                                      @RequestParam("chkList2") String chkList2,
-                                      @RequestParam("memSeq") int memSeq) {
+                                      @RequestParam("prjInDtList") List<String> prjInDtList,
+                                      @RequestParam("prjOutDtList") List<String> prjOutDtList,
+                                      @RequestParam("prjRoCdList") List<String> prjRoCdList,
+                                      @RequestParam("memSeq") int memSeq,
+                                      @RequestParam("chkList") List<String> chkList) {
 
+        // 디버깅용 로그
+        System.out.println("prjInDtList: " + prjInDtList);
+        System.out.println("prjOutDtList: " + prjOutDtList);
+        System.out.println("prjRoCdList: " + prjRoCdList);
+        System.out.println("chkList: " + chkList);
 
+        List<Integer> prjSeqList = chkList.stream()
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
 
-        System.out.println("업뎃하고 싶은 chkList => " + chkList2);
-
-        // 쉼표로 구분된 chkList 문자열을 배열로 변환
-        String[] grpCode = chkList2.split(",");  // 예: "1,2,3" -> ["1", "2", "3"]
-
-        // 정수형 리스트를 선언하여 변환된 값을 저장할 준비를 함
-        List<Integer> prjSeqList = new ArrayList<>();  // 빈 List<Integer> 선언
-
-        // grpCode 배열의 각 요소를 순회하면서 문자열을 정수로 변환 후 리스트에 추가
-        for (int i = 0; i < grpCode.length; i++) {
-
-            // 현재 인덱스의 값을 가져옴 (예: "1", "2", "3" 중 하나)
-            String code = grpCode[i];
-
-            // 문자열 값을 Integer로 변환하고 리스트에 추가
-            prjSeqList.add(Integer.parseInt(code));  // "1" -> 1, "2" -> 2 등으로 변환 후 리스트에 추가
-        }
-
-
-        // 수정 로직 실행!!!
-        memberService.memberProjectUpdate(memberProject, prjSeqList, memSeq);
-
+        // 수정 로직 실행
+        memberService.memberProjectUpdate(prjSeqList, memSeq, memberProject, prjInDtList, prjOutDtList, prjRoCdList);
 
         return "redirect:/member/memberProject?memSeq=" + memSeq;
     }
+
+    /*
+    * @RequestParam("prjInDtList"), @RequestParam("prjOutDtList"), @RequestParam("prjRoCdList")
+       파라미터를 추가하여 각 프로젝트의 투입일, 철수일, 역할코드를 배열로 받아옴.
+       각 prjSeqList 항목에 대해 각각의 투입일, 철수일, 역할코드를 적용할 수 있도록
+       반복문을 사용하여 개별적으로 업데이트 실행.
+    * */
+
+
+
+
+
+
 
 
 }

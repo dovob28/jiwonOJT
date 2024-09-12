@@ -29,8 +29,9 @@
             crossorigin="anonymous"></script>
 
 
-    <%--팝업창--%>
     <script type="text/javascript">
+
+        <%--팝업창--%>
         /*function popUp(){
             // open("경로", "이름", "옵션")
             window.open("/member/memberPopup", "memberPopup", "width=900px, height=600, left=400, top=100" );
@@ -45,6 +46,7 @@
         }
 
 
+
         // 체크박스
         $(function () {
             var chkObj = document.getElementsByName("RowCheck");
@@ -56,6 +58,7 @@
                     chk_listArr[i].checked = this.checked;
                 }
             });
+
             $("input[name='RowCheck']").click(function () {
                 if ($("input[name='RowCheck']:checked").length == rowCnt) {
                     $("input[name='allCheck']")[0].checked = true;
@@ -66,22 +69,18 @@
         });
 
 
-        // 삭제 버튼
+
+        // 체크 삭제
         function deleteValue() {
+            let groupList = [];
 
-            let groupList = "";
-
-            // 체크된 항목들의 값을 모아서 하나의 문자열로 만듭니다.
+            // 체크된 항목들의 값을 배열로 모읍니다.
             $(".chkGrp:checked").each(function (idx, item) {
-                if (idx === 0) {
-                    groupList += item.value;
-                } else {
-                    groupList += "," + item.value;
-                }
+                groupList.push(item.value);
             });
 
             // 삭제할 항목이 없다면 경고
-            if (groupList === "") {
+            if (groupList.length === 0) {
                 alert("삭제할 항목을 선택하세요.");
                 return;
             }
@@ -89,56 +88,76 @@
             // Ajax로 삭제 요청을 보냄
             $.ajax({
                 url: '/member/memberProjectDelete',
-                type: 'POST',
-                data: {chkList: groupList, memSeq: $("input[name='memSeq']").val()},  // 문자열과 memSeq를 함께 전송
+                method: 'POST',
+                data: {chkList: groupList, memSeq: $("input[name='memSeq']").val()},  // 배열과 memSeq를 함께 전송
+                traditional: true,  // 배열을 쿼리 스트링으로 전송
                 success: function (response) {
-                    alert("삭제가 완료되었습니다.");  // 삭제 완료 알림
-                    // 현재 창을 새로고침
+                    alert("삭제가 완료되었습니다.");
                     window.location.reload();  // 페이지 새로고침
                 },
                 error: function () {
                     alert("삭제 중 오류가 발생했습니다.");
                 }
             });
-
         }
 
 
-        // 수정 버튼
+
+
+        // 사원 프로젝트 리스트 체크 수정
         function updateValue() {
+            let groupList = [];  // 선택된 체크박스의 project ID 값 배열
+            let prjInDtList = [];  // 프로젝트 시작일 배열
+            let prjOutDtList = [];  // 프로젝트 종료일 배열
+            let prjRoCdList = [];  // 역할 코드 배열
 
-            let groupList = "";
-
-            // 체크된 항목들의 값을 모아서 하나의 문자열로 만듭니다.
+            // 체크된 항목들의 값을 배열로 모음
             $(".chkGrp:checked").each(function (idx, item) {
-                if (idx === 0) {
-                    groupList += item.value;
-                } else {
-                    groupList += "," + item.value;
-                }
+                groupList.push(item.value);  // 체크박스의 value (project ID) 추가
+
+                // 각 체크된 항목에 대응하는 prjInDt, prjOutDt, prjRoCd 값을 배열에 추가
+                let prjInDt = $(item).closest('tr').find("input[name='prjInDt']").val();
+                let prjOutDt = $(item).closest('tr').find("input[name='prjOutDt']").val();
+                let prjRoCd = $(item).closest('tr').find("select[name='prjRoCd']").val();
+
+                // 디버깅용 로그
+                console.log(`prjInDt: ${prjInDt}, prjOutDt: ${prjOutDt}, prjRoCd: ${prjRoCd}`);
+
+                prjInDtList.push(prjInDt);  // 각각의 값을 배열에 추가
+                prjOutDtList.push(prjOutDt);
+                prjRoCdList.push(prjRoCd);
             });
 
-            // 삭제할 항목이 없다면 경고
-            if (groupList === "") {
+            // 체크된 항목이 없으면 경고
+            if (groupList.length === 0) {
                 alert("수정할 항목을 선택하세요.");
                 return;
             }
 
-            // Ajax로 삭제 요청을 보냄
+            // Ajax 요청을 통해 서버로 수정 데이터를 전송
             $.ajax({
-                url: '/member/memberProjectDelete',
-                type: 'POST',
-                data: {chkList2: groupList, memSeq: $("input[name='memSeq']").val()},  // 문자열과 memSeq를 함께 전송
-                success: function (response) {
-                    alert("수정 완료되었습니다.");  // 삭제 완료 알림
-                    // 현재 창을 새로고침
-                    window.location.reload();  // 페이지 새로고침
+                url: '/member/memberProjectUpdate',  // 데이터 전송할 URL
+                method: 'POST',  // POST 방식으로 전송
+                data: {
+                    chkList: groupList,  // 선택된 항목 리스트 (project ID 리스트)
+                    memSeq: $("input[name='memSeq']").val(),  // 멤버 시퀀스 (hidden input에서 가져옴)
+
+                    prjInDtList: prjInDtList,  // 프로젝트 시작일 리스트
+                    prjOutDtList: prjOutDtList,  // 프로젝트 종료일 리스트
+                    prjRoCdList: prjRoCdList  // 역할 코드 리스트
                 },
-                error: function () {
+                traditional: false,  // 배열을 개별 쿼리스트링으로 전송
+
+                success: function (response) {
+                    alert("수정 완료되었습니다.");
+                    window.location.reload();  // 성공 시 페이지 새로고침
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error during update:", status, error);  // 오류 로그 출력
                     alert("수정 중 오류가 발생했습니다.");
                 }
-            });
 
+            });console.log('prjInDtList: ',prjInDtList, 'prjOutDtList: ', prjOutDtList, 'prjRoCdList: ', prjRoCdList);
         }
 
 
@@ -214,6 +233,7 @@
                         <td>${checkedProject.prjSeq}</td>
                         <td>${checkedProject.prjNm}</td>
                         <td>${checkedProject.custCdNm}</td>
+
                         <td><input type="date" name="prjInDt"
                                    value="<fmt:formatDate value='${checkedProject.prjInDt}' pattern='yyyy-MM-dd'/>"
                                    required/></td>
@@ -222,16 +242,16 @@
                                    value="<fmt:formatDate value='${checkedProject.prjOutDt}' pattern='yyyy-MM-dd'/>"
                                    required/></td>
 
-                        <td><%--${checkedProject.prjRoCd}--%>
-
+                        <td>
                             <select name="prjRoCd" required>
                                 <option value="">선택</option>
                                 <c:forEach var="role" items="${roles}">
-                                    <option value="${role.dtlCd}">${role.dtlCdNm}</option>
+                                    <option value="${role.dtlCd}"
+                                        ${checkedProject.prjRoCd == role.dtlCd ? 'selected="selected"' : ''}>
+                                            ${role.dtlCdNm}
+                                    </option>
                                 </c:forEach>
                             </select>
-
-
                         </td>
 
 

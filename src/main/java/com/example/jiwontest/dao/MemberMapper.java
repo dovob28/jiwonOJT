@@ -101,10 +101,16 @@ public interface MemberMapper {
 
 
 
-    // 사원 프로젝트 리스트 수정
-    void memberProjectUpdate(MemberProjectDto memberProject,
-                             @Param("chkList2") List<Integer> chkList2,
-                             @Param("memSeq") int memSeq);
+
+    // 사원 프로젝트 리스트 체크 수정
+    void memberProjectUpdate(@Param("prjSeqList") List<Integer> prjSeqList,
+                             @Param("memSeq") int memSeq,
+                             MemberProjectDto memberProject,
+                             @Param("prjInDtList") List<String> prjInDtList,
+                             @Param("prjOutDtList") List<String> prjOutDtList,
+                             @Param("prjRoCdList") List<String> prjRoCdList);
+
+
 
 
 }

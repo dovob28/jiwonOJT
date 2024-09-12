@@ -369,8 +369,6 @@
             LEFT JOIN CODE_DETAIL cd_ro
                 ON mp.CUST_CD = cd_ro.DTL_CD AND cd_ro.MST_CD = 'RO01'
 
-
-
         WHERE
         mp.mem_seq = #{memSeq}
 
@@ -442,23 +440,32 @@
     -->
 
 
-    <!--사원 프로젝트 리스트 수정-->
+     <!--사원 프로젝트 리스트 체크 수정-->
     <!--(투입일 철수일 역할 변경)-->
+<!--    <update id="memberProjectUpdate" parameterType="map">-->
+<!--        <foreach collection="prjSeqList" item="prjSeq" index="index" separator=";">-->
+<!--            UPDATE member_project-->
+<!--            SET-->
+<!--            PRJ_IN_DT = #{prjInDtList[${index}]},  &lt;!&ndash; ${}를 사용하여 index를 명시적으로 처리 &ndash;&gt;-->
+<!--            PRJ_OUT_DT = #{prjOutDtList[${index}]},-->
+<!--            PRJ_RO_CD = #{prjRoCdList[${index}]}-->
+<!--            WHERE prj_Seq = #{prjSeq}-->
+<!--            AND mem_Seq = #{memSeq};-->
+<!--        </foreach>-->
+<!--    </update>-->
+
     <update id="memberProjectUpdate" parameterType="map">
-        UPDATE member_project
-        SET
-        PRJ_IN_DT = #{prjInDt},
-        PRJ_OUT_DT = #{prjOutDt},
-        PRJ_RO_CD = #{prjRoCd}
-
-        WHERE prj_Seq IN
-
-        <foreach collection="chkList2" item="item" open="(" close=")" separator=","> /*(1, 2, 3)*/
-            #{item}
+        <foreach collection="prjSeqList" item="prjSeq" index="index">
+            UPDATE member_project
+            SET PRJ_IN_DT = #{prjInDtList[${index}]},  <!-- 수정: ${index}로 인덱스를 명시적으로 처리 -->
+            PRJ_OUT_DT = #{prjOutDtList[${index}]},
+            PRJ_RO_CD = #{prjRoCdList[${index}]}
+            WHERE prj_Seq = #{prjSeq}
+            AND mem_Seq = #{memSeq}
         </foreach>
-        AND
-        mem_Seq = #{memSeq}
     </update>
+
+
 
 
 

@@ -2,8 +2,10 @@ package com.example.jiwontest.dto;
 
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Date;
+import java.util.List;
 
 
 // 사원_참여 프로젝트 관리
@@ -29,5 +31,11 @@ public class MemberProjectDto {
 
     private String custCdNm; // 고객사명
     private String prjRoCdNM; // 역할명
+
+    private List<Integer> prjSeqList;
+    private List<String> chkList;
+    private List<String> prjInDtList;
+    private List<String> prjOutDtList;
+    private List<String> prjRoCdList;
 
 }

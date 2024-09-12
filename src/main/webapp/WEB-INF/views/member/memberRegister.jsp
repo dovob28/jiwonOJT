@@ -25,6 +25,8 @@
     <%-- 다음 주소 API --%>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
+
+        <%-- 다음 주소 API --%>
         function daumPost() {
             new daum.Postcode({
                 oncomplete: function (data) {
@@ -58,6 +60,21 @@
                 }
             }).open();
         }
+
+
+        /*유효성 검사*/
+        /*function validateForm(){
+
+            const memId = document.getElementById("memId").value;
+
+            if(memId.length < 8 ){
+
+                alert("비번")
+            }
+
+        }*/
+
+
     </script>
 
 
@@ -81,32 +98,32 @@
 
         <tr>
             <td>*아이디</td>
-            <td><input type="text" name="memId" required/></td>
+            <td><input type="text" id= "memId" name="memId" required/></td>
         </tr>
 
         <tr>
             <td>*비밀번호</td>
-            <td><input type="password" name="memPw" required/></td>
+            <td><input type="password" id= "memPw" name="memPw" required/></td>
         </tr>
 
         <tr>
             <td>*비밀번호확인</td>
-            <td><input type="password" name="memPwConfirm" required/></td>
+            <td><input type="password" id= "memPwConfirm" name="memPwConfirm" required/></td>
         </tr>
 
         <tr>
             <td>*사원명</td>
-            <td><input type="text" name="memNm" required/></td>
+            <td><input type="text" id= "memNm" name="memNm" required/></td>
         </tr>
 
         <tr>
             <td>생년월일</td>
-            <td><input type="date" name="memBirth" required/></td>
+            <td><input type="date" id= "memBirth" name="memBirth" required/></td>
         </tr>
 
         <tr>
             <td>*입사일</td>
-            <td><input type="date" name="memHireDate" required/></td>
+            <td><input type="date" id= "memHireDate" name="memHireDate" required/></td>
         </tr>
 
 
@@ -169,12 +186,12 @@
 
         <tr>
             <td>이메일</td>
-            <td><input type="email" name="memEmail" required/></td>
+            <td><input type="email" id= "memEmail" name="memEmail" required/></td>
         </tr>
 
         <tr>
             <td>*전화번호</td>
-            <td><input type="text" name="memPhone" required maxlength="20"/></td>
+            <td><input type="text" id= "memPhone" name="memPhone" required maxlength="20"/></td>
         </tr>
 
 
