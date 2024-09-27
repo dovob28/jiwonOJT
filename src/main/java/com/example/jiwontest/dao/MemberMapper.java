@@ -23,16 +23,16 @@ public interface MemberMapper {
     List<CodeDetail> getCodeDetailsByMstCd(String mstCd);
 
 
-    // 마스터 코드와 멤버의 아이디를 이용하여 보유스킬 목록 조회
+    // 마스터 코드와 멤버의 아이디를 이용하여 보유스킬 목록 조회  (이걸해야 선택목록 뜸)
     List<CodeDetail> getCodeDetail(@Param("mstCode") String mstCode,
                                    @Param("member") MemberInfoDto member);
 
-    // 보유기술등록
+    // 보유기술등록 (신규등록용)
     void insertMemberSkill(@Param("memSeq") int memSeq,
                            @Param("skCd") String skCd);
 
 
-    // 사원검색
+    // 사원 검색 리스트
     List<MemberInfoDto> searchMembers(@Param("memNm") String memNm,
                                       @Param("memRaCd") String memRaCd,
                                       @Param("memDpCd") String memDpCd,
@@ -43,6 +43,11 @@ public interface MemberMapper {
     // 신규등록
     void insertMember(MemberInfoDto memberInfo);
 
+    // 아이디 중복 체크
+    int memberIdCheck(String memId);
+
+
+
 
     // 상세조회
     MemberInfoDto getMemberById(int memSeq);
@@ -50,12 +55,11 @@ public interface MemberMapper {
 
     // 사원수정
     void updateMember(MemberInfoDto memberInfo);
-
-    // 사원 보유기술 삭제
+    // -사원 보유기술 삭제
     void deleteMemberSkill(MemberInfoDto memberInfo);
+    // -사원 보유기술 수정
+    //  위 보유기술등록 (신규등록용) 다시 넣어줌
 
-    // 사원 보유기술 수정
-    void updateMemberSkill(MemberInfoDto memberInfo);
 
 
     // 사원삭제
@@ -66,13 +70,16 @@ public interface MemberMapper {
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-    // 팝업창 조회
-    List<ProjectInfoDto> selectAllProjects();
 
-    // 팝업 검색용
+    // 팝업창 //검색 조건이 없는 경우 (초기화 포함)
+    List<ProjectInfoDto> selectAvailableProjects(@Param("memberProjectIds") List<Integer> memberProjectIds);
+
+    // 팝업창 //검색 조건이 있는 경우
     List<ProjectInfoDto> searchPopupPrjs(@Param("prjNm") String prjNm,
                                          @Param("custCd") String custCd,
-                                         @Param("memSeq") int memSeq);
+                                         @Param("memSeq") int memSeq,
+                                         @Param("memberProjectIds") List<Integer> memberProjectIds);
+
 
    // 체크박스 값 저장
     void memberProjectAdd(List<MemberProjectDto> memberProjects);
@@ -101,15 +108,8 @@ public interface MemberMapper {
 
 
 
-
-    // 사원 프로젝트 리스트 체크 수정
-    void memberProjectUpdate(@Param("prjSeqList") List<Integer> prjSeqList,
-                             @Param("memSeq") int memSeq,
-                             MemberProjectDto memberProject,
-                             @Param("prjInDtList") List<String> prjInDtList,
-                             @Param("prjOutDtList") List<String> prjOutDtList,
-                             @Param("prjRoCdList") List<String> prjRoCdList);
-
+    // 사원 프로젝트 체크 수정
+    void updateMemberProject(MemberProjectDto memberProject);
 
 
 

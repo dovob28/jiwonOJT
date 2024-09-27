@@ -1,13 +1,12 @@
 package com.example.jiwontest.controller;
 
 
-import com.example.jiwontest.dto.CodeDetail;
-import com.example.jiwontest.dto.MemberInfoDto;
-import com.example.jiwontest.dto.MemberProjectDto;
-import com.example.jiwontest.dto.ProjectInfoDto;
+import com.example.jiwontest.dto.*;
 import com.example.jiwontest.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -36,24 +35,29 @@ public class MemberController {
     }
 
 
+
     // 전체조회/ 검색/ 페이징
     @GetMapping("/member/memberList")
-    public String memberList(
-            @RequestParam(defaultValue = "") String memNm, // 검색용들
-            @RequestParam(required = false) String memRaCd,
-            @RequestParam(required = false) String memDpCd,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startHireDate,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endHireDate,
+    public String memberList(@RequestParam(defaultValue = "") String memNm, // 검색용들
+                             @RequestParam(required = false) String memRaCd,
+                             @RequestParam(required = false) String memDpCd,
+                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startHireDate,
+                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endHireDate,
 
-            @RequestParam(defaultValue = "1") int page,  // 페이지 번호
-            @RequestParam(defaultValue = "10") int size, // 한 페이지에 보여줄 데이터 수
+                             @RequestParam(defaultValue = "1") int page,  // 페이지 번호
+                             @RequestParam(defaultValue = "10") int size, // 한 페이지에 보여줄 데이터 수
 
-            Model model) {
-
-
+                             Model model// 전체조회용
+                            ){
 
 
-        // 서비스 호출하여 검색 결과를 가져옴
+        // 조회 전 안보이게
+        boolean beforeSearched = !(memNm.isEmpty() && memRaCd == null && memDpCd == null && startHireDate == null && endHireDate == null);
+        model.addAttribute("beforeSearched", beforeSearched);
+
+
+
+        // 사원 검색 리스트
         List<MemberInfoDto> members = memberService.searchMembers(memNm, memRaCd, memDpCd, startHireDate, endHireDate);
 
         // 검색 조건도 모델에 추가
@@ -124,8 +128,30 @@ public class MemberController {
 
         memberService.insertMember(memberInfo);
 
-        return "redirect:/member/memberList";
+        return "redirect:/member/memberList?page=1&size=10&memNm=&memRaCd=&memDpCd=&startHireDate=&endHireDate=";
     }
+
+
+    // 아이디 중복 체크 (value 값이 ajax의 url값과 같아야 한다 그리고 /여부 중요)
+    @PostMapping(value="/member/memberIdCheck", produces = "application/json; charset=utf8")
+    @ResponseBody
+    public Map<Object, Object> memberIdCheck(@RequestBody Map<String, Object> param) {
+
+        String memId = (String) param.get("memId");
+
+        System.out.println("받은 memId 값: " + memId);
+
+        int count = memberService.memberIdCheck(memId); // DB에서 중복 아이디 조회
+
+        Map<Object, Object> map = new HashMap<>();
+
+        map.put("idCount", count); // ("키", 값) => 값이 0인지 1 인진 mapper에서 select로확인
+
+        return map;
+    }
+
+
+
 
 
     // 상세조회
@@ -165,20 +191,22 @@ public class MemberController {
     @PostMapping("/member/memberUpdate")
     public String memberUpdate(@ModelAttribute MemberInfoDto memberInfo) {
 
+        // 사원 정보용
         memberService.updateMember(memberInfo);
 
+        // 보유기술 수정용 => 삭제 하고 수정
         memberService.deleteMemberSkill(memberInfo);
         memberService.updateMemberSkill(memberInfo);
+
+        System.out.println("사원정보 => " + memberInfo);
 
         System.out.println("getMemRaCd() : " + memberInfo.getMemRaCd()); // 123
         System.out.println("getMemDpCd() : " + memberInfo.getMemDpCd());
         System.out.println("getMemDvCd() : " + memberInfo.getMemDvCd());
-        System.out.println("사원정보 => " + memberInfo);
-
         System.out.println("보유기술 =>" + memberInfo.getMemSkills());
 
 
-        return "redirect:/member/memberList";
+        return "redirect:/member/memberList?page=1&size=10&memNm=&memRaCd=&memDpCd=&startHireDate=&endHireDate=";
     }
 
 
@@ -190,45 +218,62 @@ public class MemberController {
 
         memberService.deleteMember(memSeq);
 
-        return "redirect:/member/memberList";
+        return "redirect:/member/memberList?page=1&size=10&memNm=&memRaCd=&memDpCd=&startHireDate=&endHireDate=";
     }
+
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    // 팝업창 조회 & 검색 => 검색할때도 memSeq값이 필요하다!!!!!!!
+
+    // 팝업창 조회 & 검색
+    // => 검색할때도 memSeq값이 필요하다!!!!!!!
+    // 사원이 선택한 프로젝트는 뜨면 안됌
     @GetMapping("/member/memberPopup")
     public String memberPopup(Model model,
-                              @RequestParam int memSeq, // 팝업 인지용
+                              @RequestParam int memSeq,
 
-                              @RequestParam(defaultValue = "") String prjNm, //검색용
-                              @RequestParam(required = false) String custCd
-                              ) {
+                              @RequestParam(defaultValue = "") String prjNm,
+                              @RequestParam(required = false) String custCd) {
 
-        // 팝업 프로젝트 불러오기
-        List<ProjectInfoDto> projects = memberService.selectAllProjects();
 
-        model.addAttribute("member", memSeq);
+
+        // 멤버의 현재 프로젝트 목록 가져오기
+        List<MemberProjectDto> memberProjects = memberService.getProjectList(memSeq);
+
+        List<Integer> memberProjectIds = memberProjects.stream()
+                                         .map(MemberProjectDto::getPrjSeq)
+                                         .collect(Collectors.toList());
+
+
+        List<ProjectInfoDto> projects;
+
+        if (prjNm.isEmpty() && custCd == null) {
+
+            // 검색 조건이 없는 경우 (초기화 포함)
+            projects = memberService.selectAvailableProjects(memberProjectIds);
+
+        } else {
+
+            // 검색 조건이 있는 경우
+            projects = memberService.searchPopupPrjs(prjNm, custCd, memSeq, memberProjectIds);
+        }
+
+        model.addAttribute("memSeq", memSeq);
         model.addAttribute("projects", projects);
 
-        System.out.println("팝업창 memSeq => " + memSeq);
-        System.out.println("팝업창 projects => " + projects);
 
 
-        // 팝업 검색용
-        List<ProjectInfoDto> popProjects = memberService.searchPopupPrjs(prjNm, custCd, memSeq);
-        model.addAttribute("projects", popProjects);
-        model.addAttribute("member", memSeq);
-
-        System.out.println("팝업창검색!!! popProjects => " + popProjects);
-        System.out.println("검색 memSeq => " + memSeq);
-
-
-        // 디테일 코드
+        // 검색용 디테일 코드
         List<CodeDetail> customers = memberService.getCodeDetailsByMstCd("CU01");
         model.addAttribute("customers", customers);
 
+        // 조회 안될떄
+        boolean beforeSearchedPop = !(prjNm.isEmpty() && custCd == null);
+        model.addAttribute("beforeSearchedPop", beforeSearchedPop);
 
         return "/member/memberPopup";
     }
@@ -327,6 +372,7 @@ public class MemberController {
 
 
 
+
     // 사원 프로젝트 리스트 삭제
     @PostMapping("/member/memberProjectDelete")
     public String memberProjectDelete(@RequestParam("chkList") String chkList,
@@ -367,42 +413,25 @@ public class MemberController {
 
 
 
+    // 사원 프로젝트 체크 수정
+    // @RequestBody List<MemberProjectDto> memberProjects 로 전부 불러울수 있다
+    // 쓸데없이 다 안쳐넣어도 됌 => 코드의 간결화, 유지보수
+    @PostMapping("/member/updateProjects")
+    @ResponseBody
+    public ResponseEntity<String> updateMemberProject(@RequestBody List<MemberProjectDto> memberProjects) {
 
+        try {
+            memberService.updateMemberProject(memberProjects);
 
+            return ResponseEntity.ok("Success");
 
+        } catch (Exception e) {
 
-    // 사원 프로젝트 리스트 체크 수정
-    // 배열로 가져와서 각각 넣어줘야 되는거 같은데 1도 안된다 나중에 다시.........
-    @PostMapping("/member/memberProjectUpdate")
-    public String memberProjectUpdate(@ModelAttribute MemberProjectDto memberProject,
-                                      @RequestParam("prjInDtList") List<String> prjInDtList,
-                                      @RequestParam("prjOutDtList") List<String> prjOutDtList,
-                                      @RequestParam("prjRoCdList") List<String> prjRoCdList,
-                                      @RequestParam("memSeq") int memSeq,
-                                      @RequestParam("chkList") List<String> chkList) {
-
-        // 디버깅용 로그
-        System.out.println("prjInDtList: " + prjInDtList);
-        System.out.println("prjOutDtList: " + prjOutDtList);
-        System.out.println("prjRoCdList: " + prjRoCdList);
-        System.out.println("chkList: " + chkList);
-
-        List<Integer> prjSeqList = chkList.stream()
-                .map(Integer::parseInt)
-                .collect(Collectors.toList());
-
-        // 수정 로직 실행
-        memberService.memberProjectUpdate(prjSeqList, memSeq, memberProject, prjInDtList, prjOutDtList, prjRoCdList);
-
-        return "redirect:/member/memberProject?memSeq=" + memSeq;
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
     }
 
-    /*
-    * @RequestParam("prjInDtList"), @RequestParam("prjOutDtList"), @RequestParam("prjRoCdList")
-       파라미터를 추가하여 각 프로젝트의 투입일, 철수일, 역할코드를 배열로 받아옴.
-       각 prjSeqList 항목에 대해 각각의 투입일, 철수일, 역할코드를 적용할 수 있도록
-       반복문을 사용하여 개별적으로 업데이트 실행.
-    * */
+
 
 
 

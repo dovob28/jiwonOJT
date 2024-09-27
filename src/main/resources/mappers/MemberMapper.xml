@@ -28,7 +28,6 @@
         <result property="dpCdNm" column="DP_CD_NM"/> <!-- 부서 코드명 -->
         <result property="dvCdNm" column="DV_CD_NM"/> <!-- 개발분야 코드명 -->
 
-        <!--<result property="memSkills" column="MEM_SKILLS"/>-->
     </resultMap>
 
 
@@ -36,6 +35,7 @@
     <resultMap id="memberSkill" type="CodeDetail">
         <result property="mstCd" column="mst_cd"/>
         <result property="dtlCd" column="dtl_cd"/>
+
         <result property="mstCdNm" column="mst_cd_nm"/>
         <result property="dtlCdNm" column="dtl_cd_nm"/>
     </resultMap>
@@ -79,7 +79,6 @@
         </if>
     </select>
 
-
     <!-- 보유기술등록 -->
     <insert id="insertMemberSkill" parameterType="map">
         INSERT INTO MEMBER_SKILL (MEM_SEQ, SK_CD)
@@ -88,7 +87,8 @@
 
 
 
-    <!-- 사원검색 -->
+
+    <!-- 사원 검색 리스트 -->
     <select id="searchMembers" resultMap="memberInfo">
         SELECT mi.*,
         cd_ra.DTL_CD_NM AS RA_CD_NM,
@@ -147,24 +147,34 @@
                                  MEM_EXTRA_ADDR,
                                  MEM_EMAIL,
                                  MEM_PHONE)
-        VALUES (#{memSeq},
-                #{memImg},
-                #{memId},
-                #{memPw},
-                #{memNm},
-                #{memBirth},
-                #{memHireDate},
-                #{memRaCd},
-                #{memDpCd},
-                #{memDvCd},
-                #{memPostCode},
-                #{memAddr},
-                #{memDetailAddr},
-                #{memExtraAddr},
-                #{memEmail},
-                #{memPhone})
+                                    VALUES (#{memSeq},
+                                            #{memImg},
+                                            #{memId},
+                                            #{memPw},
+                                            #{memNm},
+                                            #{memBirth},
+                                            #{memHireDate},
+                                            #{memRaCd},
+                                            #{memDpCd},
+                                            #{memDvCd},
+                                            #{memPostCode},
+                                            #{memAddr},
+                                            #{memDetailAddr},
+                                            #{memExtraAddr},
+                                            #{memEmail},
+                                            #{memPhone})
     </insert>
 
+
+    <!-- 아이디 중복체크 -->
+    <!-- count(*) 는 갯수-->
+    <!-- 이미 존재하면 1, 없어서 가입 가능히면 0으로 뜸-->
+    <select id="memberIdCheck" parameterType="String" resultType="int">
+        select
+            count(*)
+        from MEMBER_INFO
+        where MEM_ID = #{memId}
+    </select>
 
 
 
@@ -212,17 +222,16 @@
     </update>
 
 
+    <!--상세페이지에서 보유기숳 업데이트 위한 삭제 + 수정-->
 
-    <!--상세페이지에서 보유기숳 업데이트 위한 삭제 수정-->
-
-    <!-- 사원 보유기술 삭제 -->
+    <!-- -사원 보유기술 삭제 -->
     <delete id="deleteMemberSkill" parameterType="map">
         DELETE
         FROM MEMBER_SKILL
         WHERE MEM_SEQ = #{memSeq};
     </delete>
 
-    <!-- 사원 보유기술 수정 -->
+    <!-- -사원 보유기술 수정 (삭제하고 집어넣는거여서 insert)-->
     <insert id="updateMemberSkill" parameterType="map">
         INSERT INTO MEMBER_SKILL (MEM_SEQ, SK_CD)
         VALUES (#{memSeq}, #{skCd})
@@ -234,6 +243,8 @@
         SET SK_CD = #{skCd}
         WHERE MEM_SEQ = #{memSeq};
     </update>-->
+
+
 
 
     <!-- 사원삭제 -->
@@ -275,41 +286,62 @@
         <result property="prjOutDt" column="PRJ_OUT_DT"/>
         <result property="prjRoCd" column="PRJ_RO_CD"/>
 
-        <result property="prjRoCdNM" column="PRJ_RO_CD_NM"/>
         <result property="custCdNm" column="CUST_CD_NM"/>
+        <result property="prjRoCdNM" column="PRJ_RO_CD_NM"/>
     </resultMap>
 
 
 
 
 
-    <!--팝업창 조회-->
-    <select id="selectAllProjects" resultMap="ProjectInfo">
-        SELECT *
-        from project_info
-    </select>
-
-
-
-    <!--팝업 검색용-->
-    <select id="searchPopupPrjs" resultMap="ProjectInfo">
+    <!-- 팝업창 //검색 조건이 없는 경우 (초기화 포함)-->
+    <select id="selectAvailableProjects" resultMap="ProjectInfo">
         SELECT pi.*,
-        cd.DTL_CD_NM AS CUST_CD_NM
+               cd.DTL_CD_NM AS CUST_CD_NM
 
         FROM project_info pi
 
         LEFT JOIN CODE_DETAIL cd
-               ON pi.CUST_CD = cd.DTL_CD
-               AND cd.MST_CD = 'CU01'
+               ON pi.CUST_CD = cd.DTL_CD AND cd.MST_CD = 'CU01'
 
-        WHERE prj_Nm
-                  LIKE CONCAT('%', #{prjNm}, '%')  <!-- 필수 조건 -->
-
-        <if test="custCd != null and custCd != '' ">
-            AND CUST_CD = #{custCd}
-        </if>
+        <where>
+            <if test="memberProjectIds != null and memberProjectIds.size() > 0">
+                pi.prj_seq NOT IN
+                <foreach item="item" index="index" collection="memberProjectIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
 
     </select>
+
+
+
+     <!--팝업창 //검색 조건이 있는 경우-->
+    <select id="searchPopupPrjs" resultMap="ProjectInfo">
+        SELECT pi.*,
+               cd.DTL_CD_NM AS CUST_CD_NM
+
+        FROM project_info pi
+
+        LEFT JOIN CODE_DETAIL cd
+                ON pi.CUST_CD = cd.DTL_CD AND cd.MST_CD = 'CU01'
+
+        <where>
+            <if test="memberProjectIds != null and memberProjectIds.size() > 0">
+                pi.prj_seq NOT IN
+                <foreach item="item" index="index" collection="memberProjectIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            AND pi.prj_Nm LIKE CONCAT('%', #{prjNm}, '%')
+            <if test="custCd != null and custCd != ''">
+                AND pi.CUST_CD = #{custCd}
+            </if>
+        </where>
+
+    </select>
+
 
 
 
@@ -338,6 +370,7 @@
         PRJ_RO_CD = VALUES(PRJ_RO_CD);
     </insert>
 
+
     <!-- 프로젝트 ID로 체크된 프로젝트 정보들을 가져옴-->
     <select id="getProjectsByIds" parameterType="list" resultMap="ProjectInfo">
         SELECT *
@@ -352,7 +385,7 @@
 
 
 
-    <!-- 사원 프로젝트창 조회--><!--역할 추가 해야할듯-->
+    <!-- 사원 프로젝트창 조회--><!--역할 추가 해야할듯 => 함-->
     <select id="memberProjectSelect" parameterType="map" resultMap="MemberProject">
         SELECT
         mp.*,
@@ -364,10 +397,11 @@
                 ON mp.prj_seq = pi.prj_seq
             LEFT JOIN member_info mi
                 ON mp.mem_seq = mi.mem_seq
+
             LEFT JOIN CODE_DETAIL cd_cu
-                ON mp.CUST_CD = cd_cu.DTL_CD AND cd_cu.MST_CD = 'CU01'
+                     ON mp.CUST_CD = cd_cu.DTL_CD AND cd_cu.MST_CD = 'CU01'
             LEFT JOIN CODE_DETAIL cd_ro
-                ON mp.CUST_CD = cd_ro.DTL_CD AND cd_ro.MST_CD = 'RO01'
+                     ON mp.PRJ_RO_CD = cd_ro.DTL_CD AND cd_ro.MST_CD = 'RO01'
 
         WHERE
         mp.mem_seq = #{memSeq}
@@ -410,6 +444,9 @@
     </select>
 
 
+
+
+
     <!-- 프로젝트 리스트 삭제-->
     <delete id="memberProjectDelete" parameterType="map">
         DELETE
@@ -440,32 +477,17 @@
     -->
 
 
-     <!--사원 프로젝트 리스트 체크 수정-->
-    <!--(투입일 철수일 역할 변경)-->
-<!--    <update id="memberProjectUpdate" parameterType="map">-->
-<!--        <foreach collection="prjSeqList" item="prjSeq" index="index" separator=";">-->
-<!--            UPDATE member_project-->
-<!--            SET-->
-<!--            PRJ_IN_DT = #{prjInDtList[${index}]},  &lt;!&ndash; ${}를 사용하여 index를 명시적으로 처리 &ndash;&gt;-->
-<!--            PRJ_OUT_DT = #{prjOutDtList[${index}]},-->
-<!--            PRJ_RO_CD = #{prjRoCdList[${index}]}-->
-<!--            WHERE prj_Seq = #{prjSeq}-->
-<!--            AND mem_Seq = #{memSeq};-->
-<!--        </foreach>-->
-<!--    </update>-->
 
-    <update id="memberProjectUpdate" parameterType="map">
-        <foreach collection="prjSeqList" item="prjSeq" index="index">
-            UPDATE member_project
-            SET PRJ_IN_DT = #{prjInDtList[${index}]},  <!-- 수정: ${index}로 인덱스를 명시적으로 처리 -->
-            PRJ_OUT_DT = #{prjOutDtList[${index}]},
-            PRJ_RO_CD = #{prjRoCdList[${index}]}
-            WHERE prj_Seq = #{prjSeq}
-            AND mem_Seq = #{memSeq}
-        </foreach>
+
+    <!--사원 프로젝트 체크 수정-->
+    <update id="updateMemberProject" parameterType="com.example.jiwontest.dto.MemberProjectDto">
+        UPDATE member_project
+        SET PRJ_IN_DT = #{prjInDt},
+            PRJ_OUT_DT = #{prjOutDt},
+            PRJ_RO_CD = #{prjRoCd}
+        WHERE MEM_SEQ = #{memSeq}
+          AND PRJ_SEQ = #{prjSeq}
     </update>
-
-
 
 
 

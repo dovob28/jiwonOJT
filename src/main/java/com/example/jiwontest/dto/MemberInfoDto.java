@@ -1,12 +1,10 @@
 package com.example.jiwontest.dto;
 
-import com.oracle.wls.shaded.org.apache.bcel.classfile.Code;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // 사원_정보
 @NoArgsConstructor
@@ -47,10 +45,22 @@ public class MemberInfoDto {
     private String dpCdNm; // 부서코드명
     private String dvCdNm; // 개발분야명
 
+
+    private String dtlCdNm; // 보유기술 추가
+
+
+    // 체크 박스 용
+    private List<Integer> memSeqList; // 체크박스 위해
+    private List<Integer> seqList; // 체크박스 값
+
+
     // mysql table x, resister폼에 있음
     private List<String> memSkills; // 보유기술 => [1, 2, 7, 8]
     private List<CodeDetail> skillDetails; // 보유기술 CodeDetail
                                            // => [CodeDetail(mstCd=SK01, dtlCd=1, mstCdNm=null, dtlCdNm=Java),
+
+
+
 
     // 보유기술 선택을 위한 추가
     public void setSkillDetails(List<CodeDetail> skillDetails) {
@@ -59,6 +69,7 @@ public class MemberInfoDto {
     }
 
     public String getRaCdNm() {
+
         return raCdNm;
     }
 
@@ -67,6 +78,7 @@ public class MemberInfoDto {
     }*/
 
     public String getDpCdNm() {
+
         return dpCdNm;
     }
 
@@ -75,6 +87,7 @@ public class MemberInfoDto {
     }*/
 
     public String getDvCdNm() {
+
         return dvCdNm;
     }
 
@@ -83,6 +96,7 @@ public class MemberInfoDto {
     }*/
 
     }
+
 
 
 

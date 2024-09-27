@@ -17,6 +17,7 @@ import java.util.List;
 public class MemberProjectDto {
 
     private int memSeq; // 사원번호
+
     private int prjSeq; // 프로젝트번호
     private String prjNm; // 프로젝트명
     private String custCd; // 고객사 코드

@@ -30,11 +30,8 @@
 
     <script type="text/javascript">
 
-
-        <%--팝업창 열기--%>
-
-        /* 예시
-            function popUp(){
+        <%--팝업창--%>
+        /*function popUp(){
             // open("경로", "이름", "옵션")
             window.open("/member/memberPopup", "memberPopup", "width=900px, height=600, left=400, top=100" );
         }*/
@@ -44,7 +41,7 @@
             var left = (window.screen.width / 2) - (width / 2);
             var top = (window.screen.height / 2) - (height / 2);
 
-            window.open("/member/memberPopup?memSeq=${member.memSeq}", "memberPopup", "width=" + width + ", height=" + height + ", left=" + left + ", top=" + top);
+            window.open("/project/projectPopup?prjSeq=${project.prjSeq}", "projectPopup", "width=" + width + ", height=" + height + ", left=" + left + ", top=" + top);
         }
 
 
@@ -72,7 +69,6 @@
 
 
 
-
         // 체크박스
         $(function () {
             var chkObj = document.getElementsByName("RowCheck");
@@ -94,6 +90,7 @@
                 }
             });
         });
+
 
 
         // 체크 삭제
@@ -118,9 +115,9 @@
 
             // Ajax로 삭제 요청을 보냄
             $.ajax({
-                url: '/member/memberProjectDelete',
+                url: '/project/projectMemberDelete',
                 method: 'POST',
-                data: {chkList: groupList, memSeq: $("input[name='memSeq']").val()},  // 배열과 memSeq를 함께 전송
+                data: {chkList: groupList, prjSeq: $("input[name='prjSeq']").val()},  // 배열과 memSeq를 함께 전송
                 traditional: true,  // 배열을 쿼리 스트링으로 전송
                 success: function (response) {
                     alert("삭제가 완료되었습니다.");
@@ -136,28 +133,28 @@
         // 체크 수정
         function updateValue() {
 
-            var selectedProjects = [];
+            var selectedMembers = [];
 
             $('input[name="RowCheck"]:checked').each(function() {
 
                 var row = $(this).closest('tr');
 
-                var project = {
-                    memSeq: $('input[name="memSeq"]').val(),
-                    prjSeq: $(this).val(),
+                var member = {
+                    prjSeq: $('input[name="prjSeq"]').val(),
+                    memSeq: $(this).val(),
                     prjInDt: row.find('input[name="prjInDt"]').val(),
                     prjOutDt: row.find('input[name="prjOutDt"]').val(),
                     prjRoCd: row.find('select[name="prjRoCd"]').val()
                 };
-                selectedProjects.push(project);
+                selectedMembers.push(member);
             });
 
-            if (selectedProjects.length > 0) {
+            if (selectedMembers.length > 0) {
                 $.ajax({
-                    url: '/member/updateProjects',
+                    url: '/project/updateMembers',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(selectedProjects),
+                    data: JSON.stringify(selectedMembers),
 
                     success: function(response) {
                         if (response === 'Success') {
@@ -173,7 +170,7 @@
                     }
                 });
             } else {
-                alert('수정할 프로젝트를 선택해주세요.');
+                alert('수정할 멤버를 선택해주세요.');
             }
         }
 
@@ -194,12 +191,9 @@
         }
     </style>
 
-
 </head>
 
 
-<%--<form action="${ctx}/member/memberProjectUpdate" method="post">
-      => ajax를 써서 필요없어진듯--%>
 
 
     <%--리드온니--%>
@@ -207,15 +201,14 @@
         <tr>
             <td colspan="7" style="text-align: left;">
                 <div class="d-flex justify-content-left align-items-center">
-                    <span style="margin-right: 10px;">사원번호
-                        <input type="text" name="memSeq" value="${member.memSeq}" readonly style="background-color: lightgray; border-color: lightgray"></span>
-                    <span>사원명
-                        <input type="text" name="memNm" value="${member.memNm}" readonly style="background-color: lightgray; border-color: lightgray" /></span>
+                    <span style="margin-right: 10px;">프로젝트번호
+                        <input type="text" name="prjSeq" value="${project.prjSeq}" readonly style="background-color: lightgray; border-color: lightgray"></span>
+                    <span>프로젝트명
+                        <input type="text" name="prjNm" value="${project.prjNm}" readonly style="background-color: lightgray; border-color: lightgray" /></span>
                 </div>
             </td>
         </tr>
     </table>
-
 
 
     <table class="table table-bordered" style="width: 900px; margin-left: 300px;">
@@ -224,8 +217,8 @@
         <td colspan="7" align="right">
             <div class="d-flex justify-content-end align-items-center">
 
-                <%--프로젝트 추가 팝업버튼--%>
-                <input type="button" value="프로젝트 추가" class="btn btn-primary"
+                <%--인원 추가 팝업버튼--%>
+                <input type="button" value="사원 추가" class="btn btn-primary"
                        onclick="popUp()"/>
 
             </div>
@@ -235,9 +228,9 @@
         <%--리스트--%>
         <tr style="text-align: center">
             <td style="width: 10px;"><input id="allCheck" type="checkbox" name="allCheck"/></td>
-            <td style="width: 100px;">프로젝트번호</td>
-            <td style="width: 100px;">프로젝트명</td>
-            <td style="width: 100px;">고객사명</td>
+            <td style="width: 100px;">사원번호</td>
+            <td style="width: 100px;">사원명</td>
+            <td style="width: 100px;">개발분야</td>
             <td style="width: 100px;">투입일</td>
             <td style="width: 100px;">철수일</td>
             <td style="width: 100px;">역할</td>
@@ -246,8 +239,8 @@
 
         <c:choose>
 
-            <c:when test="${empty checkedProjects}">
-            <%--<c:when test="${fn:length(checkedProjects) == 0}"> 원래는 이방식을 많이 사용!!--%>
+            <c:when test="${empty checkedMembers}">
+          <%--            <c:when test="${fn:length(checkedProjects) == 0}">--%>
                 <tr>
                     <td colspan="7" style="text-align: center; vertical-align: middle; height: 100px;">
                         등록된 프로젝트가 없습니다
@@ -255,24 +248,25 @@
                 </tr>
             </c:when>
 
+
             <c:otherwise>
-                <c:forEach var="checkedProject" items="${checkedProjects}">
-                    <tr style="text-align: center" >
+                <c:forEach var="checkedMember" items="${checkedMembers}">
+                    <tr style="text-align: center">
 
 
                         <td><input name="RowCheck" type="checkbox" id="chk" class="chkGrp"
-                                   value="${checkedProject.prjSeq}"/></td>
+                                   value="${checkedMember.memSeq}"/></td>
 
-                        <td>${checkedProject.prjSeq}</td>
-                        <td>${checkedProject.prjNm}</td>
-                        <td>${checkedProject.custCdNm}</td>
+                        <td>${checkedMember.memSeq}</td>
+                        <td>${checkedMember.memNm}</td>
+                        <td>${checkedMember.dvCdNm}</td>
 
                         <td><input type="date" id="prjInDt" name="prjInDt" onclick="highlightRow(this)" onchange="validateDates()"
-                                   value="<fmt:formatDate value='${checkedProject.prjInDt}' pattern='yyyy-MM-dd'/>"
-                                   required /></td>
+                                   value="<fmt:formatDate value='${checkedMember.prjInDt}' pattern='yyyy-MM-dd'/>"
+                                   required/></td>
 
                         <td><input type="date" id="prjOutDt" name="prjOutDt" onclick="highlightRow(this)" onchange="validateDates()"
-                                   value="<fmt:formatDate value='${checkedProject.prjOutDt}' pattern='yyyy-MM-dd'/>"
+                                   value="<fmt:formatDate value='${checkedMember.prjOutDt}' pattern='yyyy-MM-dd'/>"
                                    required/></td>
 
                         <td>
@@ -280,7 +274,7 @@
                                 <option value="">선택</option>
                                 <c:forEach var="role" items="${roles}">
                                     <option value="${role.dtlCd}"
-                                        ${checkedProject.prjRoCd == role.dtlCd ? 'selected="selected"' : ''}>
+                                        ${checkedMember.prjRoCd == role.dtlCd ? 'selected="selected"' : ''}>
                                             ${role.dtlCdNm}
                                     </option>
                                 </c:forEach>
@@ -292,10 +286,11 @@
                 </c:forEach>
             </c:otherwise>
 
+
         </c:choose>
 
-
         <%--저장 삭제 버튼--%>
+
         <td colspan="7" align="right">
             <input type="button" value="선택저장" class='btn btn-success' onclick="updateValue();"/>
             <input type="button" value="선택삭제" class="btn btn-warning" onclick="deleteValue();">

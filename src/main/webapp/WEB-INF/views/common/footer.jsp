@@ -7,8 +7,9 @@
     <br>
 	<div align="center">
 		&lt;CopyRight 2024. 
-		<Strong>Basic</Strong>. 
+		<Strong>Basic Int</Strong>.
 		All rights reserved.&gt;
 	</div>
+	<br><br>
 </footer>
 

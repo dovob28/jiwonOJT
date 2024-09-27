@@ -28,17 +28,32 @@ public class ProjectInfoDto {
     private String prjDtl; // 특이사항
 
 
-
+    // mysql table x
     private String custCdNm; // 고객사명
 
+    // 체크 박스 용
     private List<Integer> prjSeqList; // 체크박스 위해
     private List<Integer> seqList; // 체크박스 값
 
 
-    // 셀렉트용
-    /*public String getCustCdNm() {
-        return getCustCdNm;
-    }*/
+    // mysql table x, resister폼에 있음
+    private List<String> prjSkills; // 보유기술 => [1, 2, 7, 8]
+    private List<CodeDetail> skillDetails; // 보유기술 CodeDetail
+
+
+    // 보유기술 선택을 위한 추가
+    public void setSkillDetails(List<CodeDetail> skillDetails) {
+        this.skillDetails = skillDetails;
+        this.prjSkills = skillDetails.stream().map(CodeDetail::getDtlCd).toList();
+    }
+
+    public String getcustCdNm() {
+
+        return custCdNm;
+    }
+
+
+
 
 
 }

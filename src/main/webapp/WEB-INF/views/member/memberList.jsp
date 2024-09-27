@@ -29,7 +29,6 @@
             crossorigin="anonymous"></script>
 
 
-
     <script>
         /*초기화 버튼*/
         function resetForm() {
@@ -41,6 +40,7 @@
         }
 
         /*검색 유효성*/
+        // 이름
         function validateForm() {
 
             var memNm = document.querySelector('input[name="memNm"]').value;
@@ -50,7 +50,32 @@
             }
             return true; // 폼 제출
         }
+
+        // 입사일
+        function validateDates() {
+
+            // 요소 가져옴
+            const startHireDate = document.getElementById('startHireDate').value;
+            const endHireDate = document.getElementById('endHireDate').value;
+
+            // 둘다 입력 됬는지 날짜 유효 검사
+            if(startHireDate && endHireDate){
+
+                // end가 start보다 빠르거나 같지 않으면..
+                if(new Date(endHireDate) < new Date(startHireDate)){
+
+                    alert('종료일은 시작일보다 빠를 수 없습니다.');
+                    // 유효값 입력 시 endHireDate 비움
+                    document.getElementById('endHireDate').value = '';
+                }
+            }
+
+        }
+
+
+
     </script>
+
 
 </head>
 <body>
@@ -63,13 +88,20 @@
             <td colspan="7" style="text-align: left;">
                 <div class="d-flex justify-content-between align-items-center">
 
-                    <span>*사원명 <input type="text" name="memNm" value="${param.memNm}"/></span> <!-- 필수 입력 필드 -->
+
+
+                    <span>사원명
+                        <input type="text" name="memNm" value="${param.memNm}" placeholder="필수입력 항목입니다."/>
+                    </span>
+                        <!-- 필수 입력 필드 -->
 
 
                     <span>입사일
-                        <input type="date" name="startHireDate" value="${param.startHireDate}"/>
+                        <input type="date" id="startHireDate" name="startHireDate" value="${param.startHireDate}"
+                               onchange="validateDates()"/>
                         ~
-                        <input type="date" name="endHireDate" value="${param.endHireDate}"/>
+                        <input type="date" id="endHireDate" name="endHireDate" value="${param.endHireDate}"
+                               onchange="validateDates()"/>
                     </span>
 
 
@@ -106,20 +138,28 @@
 </form>
 
 
-
 <table class="table table-bordered" style="width: 900px; margin-left: 300px;">
 
 
     <td colspan="7" align="right">
         <div class="d-flex justify-content-end align-items-center">
+
+            <%--줄선택--%>
             <div class="dropdown me-2" style="margin-right: 5px">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    줄선택
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    ${pageSize}줄 <%--modelAttribute에서 가져옴--%>
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="?page=1&size=5&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">5줄</a></li>
-                    <li><a class="dropdown-item" href="?page=1&size=10&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">10줄</a></li>
-                    <li><a class="dropdown-item" href="?page=1&size=15&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">15줄</a></li>
+                    <li><a class="dropdown-item"
+                           href="?page=1&size=5&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">5줄</a>
+                    </li>
+                    <li><a class="dropdown-item"
+                           href="?page=1&size=10&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">10줄</a>
+                    </li>
+                    <li><a class="dropdown-item"
+                           href="?page=1&size=15&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">15줄</a>
+                    </li>
                 </ul>
             </div>
 
@@ -130,8 +170,7 @@
     </td>
 
 
-
-    <%--리스트--%>
+    <%--리스트 목록--%>
     <tr style="text-align: center">
         <td style="width: 100px;">사원번호</td>
         <td style="width: 100px;">아이디</td>
@@ -143,33 +182,74 @@
     </tr>
 
 
-    <c:forEach var="list" items="${lists}">
-        <tr style="text-align: center">
-            <td>${list.memSeq}</td>
-            <td>${list.memId}</td>
-            <td><a href="${ctx}/member/memberContent?memSeq=${list.memSeq}">${list.memNm}</a></td>
-            <td><fmt:formatDate value="${list.memHireDate}" pattern="yyyy-MM-dd"/></td>
-            <td>${list.raCdNm}</td> <!-- 직급 코드명 -->
-            <td>${list.dpCdNm}</td> <!-- 부서 코드명 -->
-            <td><input type="button" value="관리" class="btn btn-warning"
-                       style="width: 50px; height: 20px; font-size: 9px; font-weight: bolder; padding: 2px 5px;"
-                       onclick="location.href='${ctx}/member/memberProject?memSeq=${list.memSeq}'">
+    <c:choose>
+
+        <%-- 검색을 하지 않았거나 검색 결과가 없는 경우 --%>
+        <c:when test="${!beforeSearched || empty lists}">
+            <tr>
+                <td colspan="7" style="text-align: center; vertical-align: middle; height: 100px;">
+                    조회된 사원이 없습니다
+                </td>
+            </tr>
+        </c:when>
+
+
+        <c:otherwise>
+            <c:forEach var="list" items="${lists}">
+                <tr style="text-align: center">
+                    <td>${list.memSeq}</td>
+                    <td>${list.memId}</td>
+                    <td><a href="${ctx}/member/memberContent?memSeq=${list.memSeq}">${list.memNm}</a></td>
+                    <td><fmt:formatDate value="${list.memHireDate}" pattern="yyyy-MM-dd"/></td>
+                    <td>${list.raCdNm}</td> <!-- 직급 코드명 -->
+                    <td>${list.dpCdNm}</td> <!-- 부서 코드명 -->
+                    <td><input type="button" value="관리" class="btn btn-warning"
+                               style="width: 50px; height: 20px; font-size: 9px; font-weight: bolder; padding: 2px 5px;"
+                               onclick="location.href='${ctx}/member/memberProject?memSeq=${list.memSeq}'">
+                    </td>
+                </tr>
+            </c:forEach>
+
+
+
+    <%--if문 버전--%>
+    <%--<c:if test="${!isSearched || empty lists}">
+        <tr>
+            <td colspan="7" style="text-align: center; vertical-align: middle; height: 100px;">
+                조회된 사원이 없습니다
             </td>
         </tr>
-    </c:forEach>
+    </c:if>
+    <c:if test="${isSearched && !empty lists}">
+        <c:forEach var="list" items="${lists}">
+            <tr style="text-align: center">
+                <td>${list.memSeq}</td>
+                <td>${list.memId}</td>
+                <td><a href="${ctx}/member/memberContent?memSeq=${list.memSeq}">${list.memNm}</a></td>
+                <td><fmt:formatDate value="${list.memHireDate}" pattern="yyyy-MM-dd"/></td>
+                <td>${list.raCdNm}</td> <!-- 직급 코드명 -->
+                <td>${list.dpCdNm}</td> <!-- 부서 코드명 -->
+                <td><input type="button" value="관리" class="btn btn-warning"
+                           style="width: 50px; height: 20px; font-size: 9px; font-weight: bolder; padding: 2px 5px;"
+                           onclick="location.href='${ctx}/member/memberProject?memSeq=${list.memSeq}'">
+                </td>
+            </tr>
+        </c:forEach>
+    </c:if>--%>
 
 
 
-    <!-- 페이징 버튼 -->
+    <%--페이징--%>
     <td colspan="7" align="center">
         <nav aria-label="Page navigation">
             <ul class="pagination">
 
 
-                <!-- Previous button -->
+                <!-- Previous -->
                 <c:if test="${currentPage > 1}">
                     <li class="page-item">
-                        <a class="page-link" href="?page=${currentPage - 1}&size=${pageSize}&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">Previous</a>
+                        <a class="page-link"
+                           href="?page=${currentPage - 1}&size=${pageSize}&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">Previous</a>
                     </li>
                 </c:if>
                 <c:if test="${currentPage == 1}">
@@ -182,17 +262,19 @@
                 <!-- Page numbers -->
                 <c:forEach var="i" begin="1" end="${totalPages}">
                     <li class="page-item <c:if test='${currentPage == i}'>active</c:if>">
-                        <a class="page-link" href="?page=${i}&size=${pageSize}&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">
+                        <a class="page-link"
+                           href="?page=${i}&size=${pageSize}&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">
                                 ${i}
                         </a>
                     </li>
                 </c:forEach>
 
 
-                <!-- Next button -->
+                <!-- Next  -->
                 <c:if test="${currentPage < totalPages}">
                     <li class="page-item">
-                        <a class="page-link" href="?page=${currentPage + 1}&size=${pageSize}&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">Next</a>
+                        <a class="page-link"
+                           href="?page=${currentPage + 1}&size=${pageSize}&memNm=${memNm}&memRaCd=${memRaCd}&memDpCd=${memDpCd}&startHireDate=${startHireDate}&endHireDate=${endHireDate}">Next</a>
                     </li>
                 </c:if>
                 <c:if test="${currentPage == totalPages}">
@@ -205,10 +287,9 @@
         </nav>
     </td>
 
+        </c:otherwise>
 
-
-
-
+    </c:choose>
 
 </table>
 

@@ -14,5 +14,5 @@ public class MemberSkillDto {
     private int memSeq; // 사원번호
     private String skCd; // 기술코드
 
-    // private String skCdNm;
+    private String skCdNm;
 }

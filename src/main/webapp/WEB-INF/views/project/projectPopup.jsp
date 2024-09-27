@@ -26,29 +26,29 @@
             crossorigin="anonymous"></script>
 
 
-    <script type="text/javascript">
+       <script type="text/javascript">
 
         /*초기화 버튼*/
         function resetForm() {
 
             var form = document.querySelector('form');
-            var memSeqInput = document.querySelector('input[name="memSeq"]');
-            var memSeq = memSeqInput.value;
+            var prjSeqInput = document.querySelector('input[name="prjSeq"]');
+            var prjSeq = prjSeqInput.value;
 
-            if (!memSeq || memSeq.trim() === "") {
-                console.error("Invalid memSeq value:", memSeq);
-                alert("유효하지 않은 사원 번호입니다. 페이지를 새로고침해 주세요.");
+            if (!prjSeq || prjSeq.trim() === "") {
+                console.error("Invalid prjSeq value:", prjSeq);
+                alert("유효하지 않은 프로젝트 번호입니다. 페이지를 새로고침해 주세요.");
                 return;
             }
 
             // 폼 리셋 (검색 조건 초기화)
             form.reset();
 
-            // memSeq 값 유지
-            memSeqInput.value = memSeq;
+            // prjSeq 값 유지
+            prjSeqInput.value = prjSeq;
 
             // AJAX를 사용하여 서버에 초기화 요청
-            fetch(`${form.action}?memSeq=${memSeq}`, {
+            fetch(`${form.action}?prjSeq=${prjSeq}`, {
                 method: 'GET',
             })
                 .then(response => {
@@ -62,8 +62,8 @@
                     document.body.innerHTML = html;
                     // 체크박스 이벤트 리스너 재설정
                     setupCheckboxListeners();
-                    // memSeq 값 다시 설정 (페이지 갱신 후)
-                    document.querySelector('input[name="memSeq"]').value = memSeq;
+                    // prjSeq 값 다시 설정 (페이지 갱신 후)
+                    document.querySelector('input[name="prjSeq"]').value = prjSeq;
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -76,9 +76,9 @@
         /*검색 유효성*/
         function validateForm() {
 
-            var prjNm = document.querySelector('input[name="prjNm"]').value;
-            if (!prjNm.trim()) {
-                alert("프로젝트명을 입력해주세요.");
+            var memNm = document.querySelector('input[name="memNm"]').value;
+            if (!memNm.trim()) {
+                alert("사원명을 입력해주세요.");
                 return false; // 폼 제출 중지
             }
             return true; // 폼 제출
@@ -138,37 +138,36 @@
             setupCheckboxListeners();
         });
 
-
     </script>
 
 </head>
 <body>
 
-<input type="hidden" name="memSeq" value="${memSeq}">
+<input type="hidden" name="prjSeq" value="${prjSeq}"><%--이게 있어야지 프로젝트 번호 불러옴--%>
 
 
 
 <%--검색창--%>
-<form action="${ctx}/member/memberPopup" method="get" onsubmit="return validateForm()">
+<form action="${ctx}/project/projectPopup" method="get" onsubmit="return validateForm()">
 
-    <input type="hidden" name="memSeq" value="${memSeq}"><%--이게 있어야지 사원번호 불러옴--%>
+    <input type="hidden" name="prjSeq" value="${prjSeq}"><%--이게 있어야지 사원번호 불러옴--%>
 
     <table class="table table-bordered" style="width: 900px; margin-left: 20px; margin-top: 20px">
         <tr>
             <td colspan="7" style="text-align: left;">
                 <div class="d-flex justify-content-between align-items-center">
 
-                    <span style="margin-right: 10px;">프로젝트명
-                        <input type="text" name="prjNm" value="${param.prjNm}" placeholder="필수입력 항목입니다." required/>
+                    <span style="margin-right: 10px;">사원명
+                        <input type="text" name="memNm" value="${param.memNm}" placeholder="필수입력 항목입니다." />
                     </span>
 
-                    <span>고객사명
-                        <select name="custCd">
+                    <span>개발분야
+                        <select name="memDvCd">
                             <option value="">선택</option>
-                            <c:forEach var="customer" items="${customers}">
-                                <option value="${customer.dtlCd}"
-                                        <c:if test="${customer.dtlCd == param.custCd}">selected</c:if>>
-                                        ${customer.dtlCdNm}
+                            <c:forEach var="devField" items="${devFields}">
+                                <option value="${devField.dtlCd}"
+                                        <c:if test="${devField.dtlCd == param.memDvCd}">selected</c:if>>
+                                        ${devField.dtlCdNm}
                                 </option>
                             </c:forEach>
                         </select>
@@ -188,48 +187,46 @@
 
 
 
-<%--프로젝트 목록--%>
-<form id="projectForm" action="${ctx}/member/memberProjectAdd" method="post">
+<%--사원 목록--%>
+<form id="projectForm" action="${ctx}/project/projectMemberAdd" method="post">
 
-<input type="hidden" name="memSeq" value="${memSeq}"><%--이게 있어야지 사원번호 불러옴--%>
+<input type="hidden" name="prjSeq" value="${prjSeq}"><%--이게 있어야지 프로젝트 번호 불러옴--%>
 
 <table class="table table-bordered" style="width: 900px; margin-left: 20px;">
 
     <%--리스트--%>
     <tr style="text-align: center">
         <td style="width: 10px;"><input id="allCheck" type="checkbox" name="allCheck"/></td>
-        <td style="width: 70px;">프로젝트번호</td>
-        <td style="width: 100px;">프로젝트명</td>
-        <td style="width: 100px;">고객사명</td>
-        <td style="width: 70px;">시작일</td>
-        <td style="width: 70px;">종료일</td>
-        <td style="width: 100px;">특이사항</td>
+        <td style="width: 70px;">사원번호</td>
+        <td style="width: 100px;">사원명</td>
+        <td style="width: 100px;">개발분야</td>
+        <td style="width: 200px;">보유기술</td>
     </tr>
 
 
     <c:choose>
 
-        <c:when test="${!beforeSearchedPop || empty projects}">
+        <c:when test="${!beforeSearchedPop || empty members}">
             <tr>
                 <td colspan="7" style="text-align: center; vertical-align: middle; height: 100px;">
-                    조회된 프로젝트가 없습니다
+                    조회된 사원이 없습니다
                 </td>
             </tr>
         </c:when>
 
-        <c:otherwise>
-            <c:forEach var="project" items="${projects}">
-                <tr style="text-align: center">
-                    <td><input name="RowCheck" type="checkbox" value="${project.prjSeq}"/></td>
-                    <td>${project.prjSeq}</td>
-                    <td>${project.prjNm}</td>
-                    <td>${project.custCdNm}</td>
-                    <td><fmt:formatDate value="${project.prjStDt}" pattern="yyyy-MM-dd"/></td>
-                    <td><fmt:formatDate value="${project.prjEdDt}" pattern="yyyy-MM-dd"/></td>
-                    <td>${project.prjDtl}</td>
-                </tr>
-            </c:forEach>
-        </c:otherwise>
+
+    <c:otherwise>
+    <c:forEach var="member" items="${members}">
+        <tr style="text-align: center">
+            <td><input name="RowCheck" type="checkbox" value="${member.memSeq}"/></td>
+            <td>${member.memSeq}</td>
+            <td>${member.memNm}</td>
+            <td>${member.dvCdNm}</td>
+
+            <td>${member.dtlCdNm}</td> <%--원래 없어서 MemberInfo Dto에 추가--%>
+        </tr>
+    </c:forEach>
+   </c:otherwise>
 
   </c:choose>
 
@@ -245,13 +242,12 @@
 
 <script type="text/javascript">
 
-    /*추가 버튼*/
     function submitAndClose() {
 
         // 폼을 비동기로 제출
         // 폼 [0] => [1] !!! 폼 순서!!!! (gpt가 선호)
         // 보통은 form id="projectForm" 로 id 지정하고 getElementById 로 걸어버림 (지금 한 버전)
-        var form = document.getElementById('projectForm'); // input의 첫번째 form(memseq)를 선택
+        var form = document.getElementById('projectForm'); // input의 첫번째 form(prjseq)를 선택
         var formData = new FormData(form);
 
         fetch(form.action, {
@@ -260,8 +256,8 @@
 
         }).then(() => {
             // 부모 창에서 리다이렉트 실행
-            window.opener.location.href = "/member/memberProject?memSeq=" + form.memSeq.value;
-            alert("프로젝트가 추가 되었습니다");
+            window.opener.location.href = "/project/projectMember?prjSeq=" + form.prjSeq.value;
+            alert("사원이 추가 되었습니다");
             window.close(); // 팝업 창 닫기
         });
     }

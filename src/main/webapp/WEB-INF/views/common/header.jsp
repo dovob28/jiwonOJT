@@ -22,7 +22,7 @@
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <!-- jquery -->
-    <script src="${ path }/resources/js/jquery-3.6.0.min.js"></script>
+<%--    <script src="${ path }/resources/js/jquery-3.6.0.min.js"></script>--%>
 
 
 
@@ -33,15 +33,15 @@
 <header>
     <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #74be82;">
 
-        <h1>Basic</h1>
+        <a href="${path}/" style="font-size: 50px; color: black; text-decoration: none;">Basic</a>
 
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item" style="margin-left: 500px;">
+                <li class="nav-item" style="margin-left: 500px; font-size: 20px">
                     <a class="nav-link" href="${path}/member/memberList">사원관리</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/member/memberList.jsp">프로젝트관리</a>
+                <li class="nav-item" style="font-size: 20px">
+                    <a class="nav-link" href="${path}/project/projectList">프로젝트관리</a>
                 </li>
             </ul>
         </div>

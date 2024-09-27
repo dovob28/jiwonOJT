@@ -10,15 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
 
-@Transactional
 @Service
 public class MemberService {
 
@@ -32,12 +29,13 @@ public class MemberService {
     }*/
 
 
-    // 사원검색
+    // 사원 검색 리스트
     public List<MemberInfoDto> searchMembers(String memNm, String memRaCd, String memDpCd, LocalDate startHireDate, LocalDate endHireDate) {
+
         return memberMapper.searchMembers(memNm, memRaCd, memDpCd, startHireDate, endHireDate);
     }
 
-    // 페이징 처리 로직
+    // 페이징 처리
     public List<MemberInfoDto> paginate(List<MemberInfoDto> allMembers, int page, int size) {
         int start = (page - 1) * size;
         int end = Math.min(start + size, allMembers.size());
@@ -45,6 +43,7 @@ public class MemberService {
         // 페이징된 결과를 반환
         return allMembers.subList(start, end);
     }
+
 
 
     // 특정 마스터 코드에 해당하는 상세 코드 리스트 조회
@@ -61,6 +60,7 @@ public class MemberService {
     }
 
 
+
     // 신규등록
     public void insertMember(MemberInfoDto memberInfo) {
 
@@ -69,13 +69,23 @@ public class MemberService {
         // 사원 번호 가져오기
         int memSeq = memberInfo.getMemSeq();
 
-        // 보유 기술 저장
+        // 보유 기술 등록
         if (memberInfo.getMemSkills() != null) {
             for (String skCd : memberInfo.getMemSkills()) {
                 memberMapper.insertMemberSkill(memSeq, skCd);
             }
         }
     }
+
+
+
+    // 아이디 중복 체크
+    public int memberIdCheck(String memId) {
+        return memberMapper.memberIdCheck(memId); // Mapper에서 결과를 반환
+    }
+
+
+
 
 
     // 상세조회
@@ -89,11 +99,12 @@ public class MemberService {
             List<CodeDetail> skillDetails = memberMapper.getCodeDetail("SK01", member);
             member.setSkillDetails(skillDetails);
 
-            List<CodeDetail> memRaCd = memberMapper.getCodeDetail("RA01", member);
-            member.setMemRaCd(member.getMemRaCd());
+            /*List<CodeDetail> memRaCd = memberMapper.getCodeDetail("RA01", member);
+            member.setMemRaCd(member.getMemRaCd());*/
         }
         return member;
     }
+
 
 
     // 사원수정
@@ -103,14 +114,15 @@ public class MemberService {
     }
 
 
-    // 보유기술 수정용!!!! (삭제 + 수정)
-    //  사원보유기술 삭제
+  // 보유기술 수정용!!!! => 삭제 하고 수정
+
+    // -사원보유기술 삭제
     public void deleteMemberSkill(MemberInfoDto memberInfo) {
 
         memberMapper.deleteMemberSkill(memberInfo);
     }
 
-    // 사원보유기술 수정
+    // -사원보유기술 수정
     public void updateMemberSkill(MemberInfoDto memberInfo) {
 
         // 사원 번호 가져오기
@@ -146,20 +158,18 @@ public class MemberService {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // 팝업창 //검색 조건이 없는 경우 (초기화 포함)
+    public List<ProjectInfoDto> selectAvailableProjects(List<Integer> memberProjectIds) {
 
-    // 팝업창 조회
-    public List<ProjectInfoDto> selectAllProjects() {
-
-        List<ProjectInfoDto> projects = memberMapper.selectAllProjects();
-
-        return projects;
+        return memberMapper.selectAvailableProjects(memberProjectIds);
     }
 
+    // 팝업창  //검색 조건이 있는 경우
+    public List<ProjectInfoDto> searchPopupPrjs(String prjNm, String custCd, int memSeq, List<Integer> memberProjectIds) {
 
-    // 팝업 검색용
-    public List<ProjectInfoDto> searchPopupPrjs(String prjNm, String custCd, int memSeq) {
-        return memberMapper.searchPopupPrjs(prjNm, custCd, memSeq);
+        return memberMapper.searchPopupPrjs(prjNm, custCd, memSeq, memberProjectIds);
     }
+
 
 
     // 체크박스 값 저장
@@ -192,6 +202,8 @@ public class MemberService {
     }
 
 
+
+
     // 사원 프로젝트창 조회
     public List<MemberProjectDto> memberProjectSelect(List<Integer> prjSeqList, int memSeq) {
 
@@ -215,6 +227,8 @@ public class MemberService {
     }
 
 
+
+
     // 사원 프로젝트 리스트 삭제
     public void memberProjectDelete(List<Integer> chkList,
                                     int memSeq) {
@@ -223,35 +237,16 @@ public class MemberService {
     }
 
 
+    // 사원 프로젝트 체크 수정
+    @Transactional
+    public void updateMemberProject(List<MemberProjectDto> memberProjects) {
 
-
-    // 사원 프로젝트 리스트 수정
-//    public void memberProjectUpdate(List<Integer> prjSeqList,
-//                                    int memSeq,
-//                                    MemberProjectDto memberProject,
-//                                    List<String> prjInDtList,
-//                                    List<String> prjOutDtList,
-//                                    List<String> prjRoCdList) {
-//
-//        memberMapper.memberProjectUpdate(prjSeqList, memSeq, memberProject, prjInDtList, prjOutDtList, prjRoCdList);
-//    }
-
-    public void memberProjectUpdate(List<Integer> prjSeqList,
-                                    int memSeq,
-                                    MemberProjectDto memberProject,
-                                    List<String> prjInDtList,
-                                    List<String> prjOutDtList,
-                                    List<String> prjRoCdList) {
-
-        // 각 리스트의 크기가 일치하는지 확인
-        if (prjSeqList.size() == prjInDtList.size() &&
-                prjSeqList.size() == prjOutDtList.size() &&
-                prjSeqList.size() == prjRoCdList.size()) {
-            memberMapper.memberProjectUpdate(prjSeqList, memSeq, memberProject, prjInDtList, prjOutDtList, prjRoCdList);
-        } else {
-            throw new IllegalArgumentException("리스트의 크기가 일치하지 않습니다.");
+        for (MemberProjectDto project : memberProjects) {
+            memberMapper.updateMemberProject(project);
         }
     }
+
+
 
 
 

@@ -25,7 +25,9 @@
     <%-- 다음 주소 API --%>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
+
     <script>
+
         <%-- 다음 주소 API --%>
         function daumPost() {
             new daum.Postcode({
@@ -62,6 +64,7 @@
         }
 
 
+
         <%-- 삭제 버튼--%>
         function deleteFn(memSeq) {
 
@@ -84,6 +87,17 @@
     </script>
 
 
+    <style>
+        input::placeholder {
+            font-size: 10px;
+        }
+
+        .redStar {
+            color: red;
+        }
+    </style>
+
+
 </head>
 <body>
 
@@ -94,8 +108,10 @@
 
         <%--사원번호 --%>
         <tr>
-            <td>*사원번호</td>
-            <td><input type="text" name="memSeq" value="${member.memSeq}" readonly></td>
+            <td>사원번호</td>
+            <td>
+                <input type="text" name="memSeq" value="${member.memSeq}" readonly style="background-color: lightgray; border-color: lightgray">
+            </td>
         </tr>
 
         <%--<tr>
@@ -106,47 +122,63 @@
         </tr>--%>
 
         <tr>
-            <td>*아이디</td>
-            <td><input type="text" name="memId" value="${member.memId}"/></td>
+            <td style="width: 150px"><span class="redStar">*</span>아이디</td>
+            <td style="display: flex; align-items: center;">
+                <input type="text" id="memId" name="memId" value="${member.memId}" placeholder="7-16자 소문자+숫자" required/>
+                <span id="idError" style="color: red; font-size: 10px; display: none; margin-left: 10px;">7-16자 소문자+숫자로 입력하세요.</span>
+            </td>
         </tr>
 
         <tr>
-            <td>*비밀번호</td>
-            <td><input type="password" name="memPw" value="${member.memPw}"/></td>
+            <td><span class="redStar">*</span>비밀번호</td>
+            <td style="display: flex; align-items: center;">
+                <input type="password" id="memPw" name="memPw" value="${member.memPw}" placeholder=" 7-16자 소문자+특수+숫자"
+                required/>
+                <span id="pwError" class="error-message"
+                      style="color: red; font-size: 10px; display: none; margin-left: 10px;">7-16자 소문자+특수+숫자로 입력하세요.</span>
+            </td>
         </tr>
 
         <tr>
-            <td>*비밀번호확인</td>
-            <td><input type="password" name="memPwConfirm" value="${member.memPw}"/></td>
+            <td><span class="redStar">*</span>비밀번호확인</td>
+            <td style="display: flex; align-items: center;">
+                <input type="password" id="memPwConfirm" name="memPwConfirm" value="${member.memPw}" placeholder="7-16자
+                       소문자+특수+숫자" required/>
+                <span id="pwConfirmError" class="error-message"
+                      style="color: red; font-size: 10px; display: none; margin-left: 10px;">비밀번호가 일치하지 않습니다.</span>
+            </td>
         </tr>
 
         <tr>
-            <td>*사원명</td>
-            <td><input type="text" name="memNm" value="${member.memNm}"/></td>
+            <td><span class="redStar">*</span>사원명</td>
+            <td style="display: flex; align-items: center;">
+                <input type="text" id="memNm" name="memNm" value="${member.memNm}" placeholder="한글 2~10자" required/>
+                <span id="nameError" class="error-message"
+                      style="color: red; font-size: 10px; display: none; margin-left: 10px;">한글 2~10자로 입력하세요.</span>
+            </td>
         </tr>
 
         <tr>
             <td>생년월일</td>
             <td><input type="date" name="memBirth"
-                       value="<fmt:formatDate value='${member.memBirth}' pattern='yyyy-MM-dd'/>" required/></td>
+                       value="<fmt:formatDate value='${member.memBirth}' pattern='yyyy-MM-dd'/>" /></td>
         </tr>
 
         <tr>
-            <td>*입사일</td>
+            <td><span class="redStar">*</span>입사일</td>
             <td><input type="date" name="memHireDate"
                        value="<fmt:formatDate value='${member.memHireDate}' pattern='yyyy-MM-dd'/>" required/></td>
         </tr>
 
 
         <tr>
-            <td>직급</td>
+            <td><span class="redStar">*</span>직급</td>
             <td>
                 <select name="memRaCd" required>
                     <option value="">선택</option>
                     <c:forEach var="rank" items="${ranks}">
-                        <option value="${rank.dtlCd}"
-                            ${member.raCdNm == rank.dtlCdNm ? 'selected="selected"' : ''}>
-                                ${rank.dtlCdNm}
+                        <option value="${rank.dtlCd}" ${member.raCdNm == rank.dtlCdNm ? 'selected="selected"' : ''}>
+                                ${rank.dtlCdNm} <%--실제로 값 보여주는 코드--%>
                                 <%-- 1 or name=사장--%>
                                 <%--저장된 값을 가져와야해. a--%>
                         </option>
@@ -156,7 +188,7 @@
         </tr>
 
         <tr>
-            <td>부서</td>
+            <td><span class="redStar">*</span>부서</td>
             <td>
                 <select name="memDpCd" required>
                     <option value="">선택</option>
@@ -174,7 +206,7 @@
         <tr>
             <td>개발분야</td>
             <td>
-                <select name="memDvCd" required>
+                <select name="memDvCd" >
                     <option value="">선택</option>
                     <c:forEach var="devField" items="${devFields}">
                         <option value="${devField.dtlCd}"
@@ -220,21 +252,96 @@
         </tr>
 
         <tr>
-            <td>*전화번호</td>
-            <td><input type="text" name="memPhone" value="${member.memPhone}"/></td>
+            <td><span class="redStar">*</span>전화번호</td>
+            <td style="display: flex; align-items: center;">
+                <input type="text" id="memPhone" name="memPhone" value="${member.memPhone}" placeholder="0100000000"
+                required maxlength="20"/>
+                <span id="phoneError" class="error-message"
+                      style="color: red; font-size: 10px; display: none; margin-left: 10px;">숫자 10~12자리로 입력하세요.</span>
+            </td>
         </tr>
 
 
         <%--저장 삭제 버튼--%>
         <tr>
             <td colspan="2" align="right">
-                <input type="submit" value="저장" class='btn btn-success'/>
+                <p style="color: red">*는 필수 입력 항목</p>
+                <input type="submit" value="저장" class='btn btn-success' onclick="validate()"/>
                 <input type="button" value="삭제" class="btn btn-warning" onclick="deleteFn(${member.memSeq})"/>
             </td>
         </tr>
 
     </table>
 </form>
+
+<!-- 유효성 검사 -->
+<script>
+
+    // 아이디
+    document.getElementById('memId').addEventListener('input', function () {
+
+        var memId = this.value;
+        var pattern = /^[a-z0-9]{7,16}$/; // 소문자+숫자 7-16자
+        if (memId.match(pattern)) {
+            document.getElementById('idError').style.display = 'none';
+        } else {
+            document.getElementById('idError').style.display = 'block';
+        }
+    });
+
+    // 비밀번호
+    document.getElementById('memPw').addEventListener('input', function () {
+
+        var memPw = this.value;
+        var pattern = /^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[a-z\d!@#$%^&*]{7,16}$/; // 소문자, 숫자, 특수문자 포함 8-16자
+        if (memPw.match(pattern)) {
+            document.getElementById('pwError').style.display = 'none';
+        } else {
+            document.getElementById('pwError').style.display = 'block';
+        }
+    });
+
+    // 비밀번호 확인
+    document.getElementById('memPwConfirm').addEventListener('input', function () {
+
+        var memPw = document.getElementById('memPw').value;
+        var memPwConfirm = this.value;
+        if (memPw === memPwConfirm) {
+            document.getElementById('pwConfirmError').style.display = 'none';
+        } else {
+            document.getElementById('pwConfirmError').style.display = 'block';
+        }
+    });
+
+    // 이름
+    document.getElementById('memNm').addEventListener('input', function () {
+        var memNm = this.value;
+        var pattern = /^[가-힣]{2,10}$/; // 한글 2-10자
+        if (memNm.match(pattern)) {
+            document.getElementById('nameError').style.display = 'none';
+        } else {
+            document.getElementById('nameError').style.display = 'block';
+        }
+    });
+
+    // 전화번호
+    document.getElementById('memPhone').addEventListener('input', function () {
+        var memPhone = this.value;
+        var pattern = /^\d{10,12}$/; // 숫자 10~12자리
+        if (memPhone.match(pattern)) {
+            document.getElementById('phoneError').style.display = 'none';
+        } else {
+            document.getElementById('phoneError').style.display = 'block';
+        }
+    });
+
+    function validate() {
+        alert("수정이 완료되었습니다.");
+        return true;  // 유효성 조건을 다 만족했을때 폼을 정상적으로 제출
+    }
+
+</script>
+
 
 </body>
 <jsp:include page="/WEB-INF/views/common/footer.jsp"/>

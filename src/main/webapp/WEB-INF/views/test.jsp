@@ -30,7 +30,39 @@
 
 
 
-회원가입창.....?
+<!--Login form starts-->
+<section class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;">
+    <!--row justify-content-center is used for centering the login form-->
+    <section class="row justify-content-center">
+        <!--Making the form responsive-->
+        <section class="col-12 col-sm-6 col-md-4">
+
+            <form class="form-container">
+
+                <!--Binding the label and input together-->
+                <div class="form-group">
+                    <h4 class="text-center font-weight-bold" style="margin-bottom: 30px;"> 로그인</h4>
+                    <label for="Inputuser1">아이디</label>
+                    <input type="email" class="form-control" id="Inputuser1" aria-describeby="usernameHelp" placeholder="아이디">
+                </div>
+
+                <!--Binding the label and input together-->
+                <div class="form-group">
+                    <label for="InputPassword1">비밀번호</label>
+                    <input type="password" class="form-control" id="InputPassword1" placeholder="비밀번호">
+                </div>
+
+                <button type="Sign in" class="btn btn-primary btn-block">로그인</button>
+
+                <div class="form-footer">
+                    <p style="font-size: 11px; margin-top: 5px;"> 아이디가 없다면?
+                        <a href="#" >회원가입</a>
+                    </p>
+                </div>
+            </form>
+        </section>
+    </section>
+</section>
 
 
 
